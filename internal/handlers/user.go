@@ -30,7 +30,17 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 		return
 	}
 
-	utils.SuccessResponse(c, http.StatusOK, user)
+	// Create response without sensitive data
+	response := models.UserResponse{
+		ID:             user.ID,
+		Email:          user.Email,
+		GithubUsername: user.GithubUsername,
+		HasGithubToken: user.GithubToken != "",
+		CreatedAt:      user.CreatedAt,
+		UpdatedAt:      user.UpdatedAt,
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, response)
 }
 
 func (h *UserHandler) UpdateProfile(c *gin.Context) {
@@ -65,5 +75,15 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	utils.SuccessResponse(c, http.StatusOK, user)
+	// Create response without sensitive data
+	response := models.UserResponse{
+		ID:             user.ID,
+		Email:          user.Email,
+		GithubUsername: user.GithubUsername,
+		HasGithubToken: user.GithubToken != "",
+		CreatedAt:      user.CreatedAt,
+		UpdatedAt:      user.UpdatedAt,
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, response)
 }

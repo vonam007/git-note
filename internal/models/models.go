@@ -18,6 +18,16 @@ type User struct {
 	Notes          []Note    `json:"notes,omitempty" gorm:"foreignKey:UserID"`
 }
 
+// UserResponse represents user data for API responses
+type UserResponse struct {
+	ID             uuid.UUID `json:"id"`
+	Email          string    `json:"email"`
+	GithubUsername string    `json:"github_username"`
+	HasGithubToken bool      `json:"has_github_token"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+}
+
 type Note struct {
 	ID             uuid.UUID     `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
 	UserID         uuid.UUID     `json:"user_id" gorm:"type:uuid;not null"`

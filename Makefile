@@ -1,109 +1,194 @@
-# Makefile for GitHub Notes Backend
+# Makefile for GitHub Notes Full-Stack Application
 
 # Variables
 APP_NAME = github-notes-backend
-DOCKER_COMPOSE = docker-compose
+DOCKER_COMPOSE_FILE = docker-compose.fullstack.yml
+DOCKER_COMPOSE_CMD = docker compose
 GO_CMD = go
 GO_BUILD = $(GO_CMD) build
 GO_RUN = $(GO_CMD) run
 GO_TEST = $(GO_CMD) test
 GO_MOD = $(GO_CMD) mod
 
-# Build the application
-build:
-	$(GO_BUILD) -o bin/$(APP_NAME) cmd/main.go
+# =============================================================================
+# MAIN COMMANDS
+# =============================================================================
 
-# Run the application locally
-run:
+# Stop all Docker containers
+down:
+	@echo "🛑 Stopping all Docker containers..."
+	$(DOCKER_COMPOSE_CMD) -f $(DOCKER_COMPOSE_FILE) down
+	@echo "✅ All containers stopped"
+
+# Start all Docker containers
+up:
+	@echo "🚀 Starting full-stack application..."
+	$(DOCKER_COMPOSE_CMD) -f $(DOCKER_COMPOSE_FILE) up -d
+	@echo "✅ Application started at:"
+	@echo "   Frontend: http://localhost:3000"
+	@echo "   Backend:  http://localhost:8080"
+
+# Build full-stack application (rebuild images)
+build:
+	@echo "🔨 Building full-stack application..."
+	$(DOCKER_COMPOSE_CMD) -f $(DOCKER_COMPOSE_FILE) build --no-cache
+	@echo "✅ Build completed"
+
+# Rebuild full-stack application (down -> build -> up)
+rebuild:
+	@echo "🔄 Rebuilding full-stack application..."
+	$(MAKE) down
+	$(MAKE) build
+	$(MAKE) up
+	@echo "🎉 Full-stack application rebuilt and started!"
+
+# =============================================================================
+# DEVELOPMENT COMMANDS
+# =============================================================================
+
+# Build backend only
+build-backend:
+	@echo "🔨 Building backend..."
+	$(GO_BUILD) -o bin/$(APP_NAME) cmd/main.go
+	@echo "✅ Backend built successfully"
+
+# Run backend locally (development)
+run-backend:
+	@echo "🚀 Running backend locally..."
 	$(GO_RUN) cmd/main.go
+
+# Setup and run frontend locally (development)
+setup-frontend:
+	@echo "⚙️  Setting up frontend..."
+	cd frontend && chmod +x setup.sh && ./setup.sh
+	@echo "✅ Frontend setup completed"
+
+run-frontend:
+	@echo "🚀 Running frontend locally..."
+	cd frontend && npm start
 
 # Run tests
 test:
+	@echo "🧪 Running tests..."
 	$(GO_TEST) -v ./...
+
+# =============================================================================
+# DOCKER COMMANDS
+# =============================================================================
+
+# View Docker logs
+logs:
+	@echo "📋 Showing Docker logs..."
+	$(DOCKER_COMPOSE_CMD) -f $(DOCKER_COMPOSE_FILE) logs -f
+
+# Check Docker containers status
+status:
+	@echo "📊 Docker containers status:"
+	$(DOCKER_COMPOSE_CMD) -f $(DOCKER_COMPOSE_FILE) ps
+
+# Remove all Docker volumes (clean slate)
+clean-volumes:
+	@echo "🧹 Cleaning Docker volumes..."
+	$(DOCKER_COMPOSE_CMD) -f $(DOCKER_COMPOSE_FILE) down -v
+	docker volume prune -f
+	@echo "✅ Volumes cleaned"
+
+# =============================================================================
+# DATABASE COMMANDS
+# =============================================================================
+
+# Start only database
+db-up:
+	@echo "🗄️  Starting database..."
+	$(DOCKER_COMPOSE_CMD) -f $(DOCKER_COMPOSE_FILE) up -d postgres
+	@echo "✅ Database started"
+
+# Stop only database
+db-down:
+	@echo "🗄️  Stopping database..."
+	$(DOCKER_COMPOSE_CMD) -f $(DOCKER_COMPOSE_FILE) stop postgres
+	@echo "✅ Database stopped"
+
+# Access database shell
+db-shell:
+	@echo "🗄️  Accessing database shell..."
+	$(DOCKER_COMPOSE_CMD) -f $(DOCKER_COMPOSE_FILE) exec postgres psql -U postgres -d github_notes
+
+# =============================================================================
+# UTILITY COMMANDS
+# =============================================================================
+
+# Download and tidy Go dependencies
+deps:
+	@echo "📦 Managing dependencies..."
+	$(GO_MOD) download
+	$(GO_MOD) tidy
+	@echo "✅ Dependencies updated"
+
+# Format Go code
+fmt:
+	@echo "🎨 Formatting code..."
+	$(GO_CMD) fmt ./...
+	@echo "✅ Code formatted"
 
 # Clean build artifacts
 clean:
+	@echo "🧹 Cleaning build artifacts..."
 	rm -f bin/$(APP_NAME)
 	rm -rf tmp/
+	@echo "✅ Build artifacts cleaned"
 
-# Download dependencies
-deps:
-	$(GO_MOD) download
-	$(GO_MOD) tidy
-
-# Update dependencies
-update:
-	$(GO_MOD) get -u
-	$(GO_MOD) tidy
-
-# Docker commands
-docker-build:
-	docker build -t $(APP_NAME) .
-
-docker-run:
-	$(DOCKER_COMPOSE) up -d
-
-docker-stop:
-	$(DOCKER_COMPOSE) down
-
-docker-logs:
-	$(DOCKER_COMPOSE) logs -f
-
-docker-rebuild:
-	$(DOCKER_COMPOSE) down
-	$(DOCKER_COMPOSE) build --no-cache
-	$(DOCKER_COMPOSE) up -d
-
-# Database commands
-db-up:
-	docker run --name postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=github_notes -p 5432:5432 -d postgres:15-alpine
-
-db-down:
-	docker stop postgres
-	docker rm postgres
-
-# Development commands
-dev:
-	air
-
-# Format code
-fmt:
-	$(GO_CMD) fmt ./...
-
-# Lint code (requires golangci-lint)
-lint:
-	golangci-lint run
-
-# Generate documentation
-docs:
-	swag init -g cmd/main.go
-
-# Install development tools
-install-tools:
-	$(GO_CMD) install github.com/cosmtrek/air@latest
-	$(GO_CMD) install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-	$(GO_CMD) install github.com/swaggo/swag/cmd/swag@latest
+# Show application status
+info:
+	@echo "📋 GitHub Notes Application Info:"
+	@echo "================================="
+	@echo "Application Name: $(APP_NAME)"
+	@echo "Docker Compose:   $(DOCKER_COMPOSE_FILE)"
+	@echo ""
+	@echo "URLs:"
+	@echo "  Frontend: http://localhost:3000"
+	@echo "  Backend:  http://localhost:8080"
+	@echo "  Database: localhost:5432"
+	@echo ""
+	@echo "Main Commands:"
+	@echo "  make up       - Start full-stack"
+	@echo "  make down     - Stop all containers"
+	@echo "  make build    - Build all images"
+	@echo "  make rebuild  - Full rebuild (down->build->up)"
 
 # Show help
 help:
-	@echo "Available commands:"
-	@echo "  build          - Build the application"
-	@echo "  run            - Run the application locally"
-	@echo "  test           - Run tests"
-	@echo "  clean          - Clean build artifacts"
-	@echo "  deps           - Download dependencies"
-	@echo "  update         - Update dependencies"
-	@echo "  docker-build   - Build Docker image"
-	@echo "  docker-run     - Run with Docker Compose"
-	@echo "  docker-stop    - Stop Docker containers"
-	@echo "  docker-logs    - View Docker logs"
-	@echo "  docker-rebuild - Rebuild and restart Docker containers"
-	@echo "  db-up          - Start PostgreSQL container"
-	@echo "  db-down        - Stop PostgreSQL container"
-	@echo "  dev            - Run with air (hot reload)"
-	@echo "  fmt            - Format code"
-	@echo "  lint           - Lint code"
-	@echo "  install-tools  - Install development tools"
-	@echo "  help           - Show this help message"
+	@echo "GitHub Notes Full-Stack Application"
+	@echo "=================================="
+	@echo ""
+	@echo "🚀 MAIN COMMANDS:"
+	@echo "  up           - Start full-stack application"
+	@echo "  down         - Stop all Docker containers"
+	@echo "  build        - Build full-stack application"
+	@echo "  rebuild      - Rebuild full-stack (down->build->up)"
+	@echo ""
+	@echo "🔧 DEVELOPMENT:"
+	@echo "  build-backend    - Build backend binary"
+	@echo "  run-backend      - Run backend locally"
+	@echo "  setup-frontend   - Setup frontend dependencies"
+	@echo "  run-frontend     - Run frontend locally"
+	@echo "  test             - Run tests"
+	@echo ""
+	@echo "🐳 DOCKER:"
+	@echo "  logs         - View Docker logs"
+	@echo "  status       - Check containers status"
+	@echo "  clean-volumes - Clean Docker volumes"
+	@echo ""
+	@echo "🗄️  DATABASE:"
+	@echo "  db-up        - Start database only"
+	@echo "  db-down      - Stop database only"
+	@echo "  db-shell     - Access database shell"
+	@echo ""
+	@echo "🛠️  UTILITIES:"
+	@echo "  deps         - Manage Go dependencies"
+	@echo "  fmt          - Format Go code"
+	@echo "  clean        - Clean build artifacts"
+	@echo "  info         - Show application info"
+	@echo "  help         - Show this help"
 
-.PHONY: build run test clean deps update docker-build docker-run docker-stop docker-logs docker-rebuild db-up db-down dev fmt lint docs install-tools help
+.PHONY: down up build rebuild build-backend run-backend setup-frontend run-frontend test logs status clean-volumes db-up db-down db-shell deps fmt clean info help

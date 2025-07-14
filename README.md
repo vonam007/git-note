@@ -1,6 +1,27 @@
-# GitHub Notes Backend
+# GitHub Notes Application
 
-Một ứng dụng backend hoàn chỉnh được viết bằng Golang để quản lý ghi chú với tích hợp GitHub Pull Request.
+Một ứng dụng full-stack hoàn chỉnh để quản lý ghi chú với tích hợp GitHub Pull Request. Bao gồm backend API viết bằng Golang và frontend React application.
+
+## 🚀 Quick Start
+
+```bash
+# Khởi động full-stack application
+make up
+
+# Dừng tất cả services  
+make down
+
+# Build lại toàn bộ
+make build
+
+# Rebuild hoàn toàn (down->build->up)
+make rebuild
+
+# Xem tất cả lệnh
+make help
+```
+
+📋 **Xem hướng dẫn chi tiết**: [QUICKSTART.md](QUICKSTART.md)
 
 ## Tính năng
 
@@ -25,12 +46,24 @@ Một ứng dụng backend hoàn chỉnh được viết bằng Golang để qu�
 
 ## Công nghệ sử dụng
 
-- **Backend**: Golang với Gin framework
+### Backend
+- **Framework**: Golang với Gin framework
 - **Database**: PostgreSQL
 - **ORM**: GORM
 - **Authentication**: JWT
-- **Containerization**: Docker & Docker Compose
 - **Password Hashing**: bcrypt
+
+### Frontend
+- **Framework**: React 18
+- **Routing**: React Router DOM
+- **HTTP Client**: Axios
+- **UI Framework**: Bootstrap 5
+- **Icons**: Font Awesome
+- **Notifications**: React Toastify
+
+### DevOps
+- **Containerization**: Docker & Docker Compose
+- **Build Tool**: Create React App
 
 ## Cấu trúc dự án
 
@@ -48,6 +81,28 @@ Một ứng dụng backend hoàn chỉnh được viết bằng Golang để qu�
 │   │   └── note.go           # Handlers cho note management
 │   ├── middleware/
 │   │   └── auth.go           # Authentication middleware
+│   ├── models/
+│   │   └── models.go         # Database models
+│   ├── services/
+│   │   └── github.go         # GitHub API integration
+│   └── utils/
+│       ├── auth.go           # Authentication utilities
+│       └── response.go       # Response utilities
+├── frontend/                   # React frontend application
+│   ├── public/
+│   ├── src/
+│   │   ├── components/       # Reusable UI components
+│   │   ├── contexts/         # React Context providers
+│   │   ├── pages/           # Page components
+│   │   ├── services/        # API service functions
+│   │   └── styles/          # Global styles
+│   ├── package.json
+│   └── README.md
+├── migrations/
+├── docker-compose.yml
+├── Dockerfile
+├── go.mod
+└── README.md
 │   ├── models/
 │   │   └── models.go         # Database models và DTOs
 │   ├── services/
@@ -69,10 +124,11 @@ Một ứng dụng backend hoàn chỉnh được viết bằng Golang để qu�
 
 ### Yêu cầu hệ thống
 - Docker và Docker Compose
-- Go 1.23+ (nếu chạy local)
+- Node.js 16+ và npm (cho frontend)
+- Go 1.23+ (nếu chạy backend local)
 - PostgreSQL (nếu chạy local)
 
-### Chạy với Docker Compose (Khuyến nghị)
+### Chạy Full Stack với Docker Compose (Khuyến nghị)
 
 1. Clone repository:
 ```bash
@@ -80,39 +136,113 @@ git clone <repository-url>
 cd githubBE
 ```
 
-2. Tạo file .env (đã có sẵn, có thể chỉnh sửa nếu cần):
+2. Tạo file .env cho backend (đã có sẵn, có thể chỉnh sửa nếu cần):
 ```bash
 cp .env.example .env
 ```
 
-3. Chạy ứng dụng:
+3. Chạy toàn bộ ứng dụng (backend + frontend + database):
+```bash
+docker-compose -f docker-compose.fullstack.yml up -d
+```
+
+4. Kiểm tra trạng thái:
+```bash
+docker-compose -f docker-compose.fullstack.yml ps
+```
+
+5. Ứng dụng sẽ chạy tại:
+   - Frontend: http://localhost:3000 (tích hợp đầy đủ với backend)
+   - Backend API: http://localhost:8080
+
+### Chạy Development Mode (Frontend + Backend riêng biệt)
+
+1. Setup và chạy backend:
 ```bash
 docker-compose up -d
 ```
 
-4. Kiểm tra logs:
+2. Setup frontend:
+```bash
+cd frontend
+chmod +x setup.sh
+./setup.sh
+```
+
+3. Chạy frontend:
+```bash
+npm start
+```
+
+4. Ứng dụng sẽ chạy tại:
+   - Backend API: http://localhost:8080
+   - Frontend: http://localhost:3000
+
+### Chạy chỉ Backend
+
+1. Chạy backend với Docker:
+```bash
+docker-compose up -d
+```
+
+2. Kiểm tra logs:
 ```bash
 docker-compose logs -f backend
 ```
 
-5. Ứng dụng sẽ chạy tại: http://localhost:8080
+### Chạy Development Mode
 
-### Chạy local (Development)
-
+#### Backend
 1. Cài đặt dependencies:
 ```bash
 go mod tidy
 ```
 
-2. Chạy PostgreSQL (có thể dùng Docker):
+2. Chạy PostgreSQL:
 ```bash
 docker run --name postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=github_notes -p 5432:5432 -d postgres:15-alpine
 ```
 
-3. Chạy ứng dụng:
+3. Chạy backend:
 ```bash
 go run cmd/main.go
 ```
+
+#### Frontend
+1. Navigate to frontend directory:
+```bash
+cd frontend
+```
+
+2. Cài đặt dependencies:
+```bash
+npm install
+```
+
+3. Chạy development server:
+```bash
+npm start
+```
+
+## Sử dụng ứng dụng
+
+### Frontend Interface
+
+1. Truy cập http://localhost:3000
+2. Đăng ký tài khoản mới hoặc đăng nhập
+3. Cập nhật GitHub profile (username và token) trong Profile settings
+4. Tạo, quản lý và tìm kiếm notes
+5. Liên kết notes với GitHub Pull Requests
+
+### GitHub Personal Access Token
+
+Để sử dụng tính năng tích hợp GitHub PR:
+
+1. Vào GitHub Settings > Developer settings > Personal access tokens
+2. Tạo token mới với permissions:
+   - `public_repo` - Truy cập repositories public
+   - `read:user` - Đọc thông tin user profile
+3. Copy token và lưu vào Profile settings trong ứng dụng
 
 ## API Documentation
 

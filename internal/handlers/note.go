@@ -61,6 +61,12 @@ func (h *NoteHandler) CreateNote(c *gin.Context) {
 			return
 		}
 
+		// Validate GitHub PR parameters
+		if *req.GithubPRNumber <= 0 {
+			utils.ErrorResponse(c, http.StatusBadRequest, "PR number must be greater than 0")
+			return
+		}
+
 		// Check if PR already exists in database
 		var existingPR models.PullRequest
 		err := database.DB.Where("number = ? AND repo_owner = ? AND repo_name = ?",
@@ -70,7 +76,7 @@ func (h *NoteHandler) CreateNote(c *gin.Context) {
 			// PR doesn't exist, fetch from GitHub
 			prData, err := h.githubService.GetPullRequest(req.RepoOwner, req.RepoName, *req.GithubPRNumber, user.GithubToken)
 			if err != nil {
-				utils.ErrorResponse(c, http.StatusBadRequest, "Failed to fetch PR information from GitHub: "+err.Error())
+				utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
 				return
 			}
 

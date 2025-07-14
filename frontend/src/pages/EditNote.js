@@ -83,7 +83,19 @@ const EditNote = () => {
       toast.success('Note updated successfully!');
       navigate(`/notes/${id}`);
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to update note');
+      let errorMessage = 'Failed to update note';
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.status === 404) {
+        errorMessage = 'The GitHub repository or PR number you specified was not found. Please check the repository name and PR number.';
+      } else if (error.response?.status === 401) {
+        errorMessage = 'GitHub authentication failed. Please check your GitHub token in Profile settings.';
+      } else if (error.response?.status === 403) {
+        errorMessage = 'Access denied to the GitHub repository. Please ensure your token has the required permissions or the repository is public.';
+      }
+      
+      toast.error(errorMessage);
       console.error('Update note error:', error);
     } finally {
       setSaving(false);

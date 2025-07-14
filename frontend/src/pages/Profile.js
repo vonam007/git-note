@@ -122,11 +122,18 @@ const Profile = () => {
                       Configure your GitHub credentials to enable automatic PR information 
                       fetching when creating notes with GitHub PR numbers.
                     </p>
-                    <ul className="mb-0">
+                    <ul className="mb-2">
                       <li>Your GitHub token is encrypted and stored securely</li>
                       <li>Token is only used to fetch public PR information</li>
-                      <li>You can generate a token at: <a href="https://github.com/settings/tokens" target="_blank" rel="noopener noreferrer">GitHub Settings</a></li>
+                      <li>Generate a token at: <a href="https://github.com/settings/tokens" target="_blank" rel="noopener noreferrer">GitHub Settings → Developer settings → Personal access tokens</a></li>
                     </ul>
+                    <div className="alert alert-warning mb-0" role="alert">
+                      <small>
+                        <i className="fas fa-exclamation-triangle me-1"></i>
+                        <strong>Common issues:</strong> Ensure your token has <code>public_repo</code> and <code>read:user</code> permissions, 
+                        and that the repository/PR you're trying to access exists and is accessible.
+                      </small>
+                    </div>
                   </div>
 
                   <div className="row">

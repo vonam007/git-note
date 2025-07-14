@@ -1,0 +1,222 @@
+Hãy tạo cho tôi một dự án backend hoàn chỉnh bằng Golang để triển khai một ứng dụng ghi chú có các tính năng sau:
+
+Chức năng chính của hệ thống:
+Authentication:
+
+Cho phép user đăng ký (email, password).
+
+Cho phép user đăng nhập, trả JWT token.
+
+Mật khẩu phải được hash (sử dụng bcrypt hoặc tương đương).
+
+Middleware kiểm tra JWT để bảo vệ các API cần login.
+
+Quản lý thông tin GitHub profile của user:
+
+Cho phép user lưu:
+
+github_username
+
+github_token
+
+Các API lấy thông tin PR sẽ dùng token và username từ profile của user đang login.
+
+Nếu user chưa cấu hình GitHub token → trả lỗi rõ ràng yêu cầu user cập nhật profile trước.
+
+Quản lý Note:
+
+Cho phép user tạo một note, gồm:
+
+title (string, tối đa 255 ký tự)
+
+content (string, có thể là text hoặc markdown)
+
+github_pr_number (có thể bỏ trống hoặc có giá trị integer)
+
+repo_owner
+
+repo_name
+
+Khi user nhập github_pr_number + repo info, backend tự động gọi GitHub API (sử dụng token và username của user đang login) để lấy thông tin:
+
+PR title
+
+PR body
+
+PR author login
+
+PR URL
+
+PR state (open, closed, merged)
+
+PR created_at
+
+Lưu thông tin PR vào database để tránh phải gọi GitHub API lại nhiều lần.
+
+API cho phép:
+
+Tạo note
+
+Lấy danh sách note (có phân trang)
+
+Xem chi tiết 1 note (kèm thông tin PR nếu có)
+
+Sửa note
+
+Xoá note
+
+Tìm kiếm note theo:
+
+tiêu đề
+
+PR number
+
+PR state
+
+nội dung
+
+Yêu cầu kỹ thuật:
+Ngôn ngữ: Golang
+
+Framework: Fiber, Gin hoặc Echo (tuỳ chọn, miễn là phổ biến và dễ maintain)
+
+Database: PostgreSQL
+
+Migration tool: dùng Golang migration tools như goose, migrate hoặc GORM auto migration cũng được
+
+API chuẩn RESTful
+
+Sử dụng Docker Compose:
+
+1 service chạy backend Go
+
+1 service chạy PostgreSQL
+
+Tạo sẵn docker-compose.yaml để chạy toàn bộ hệ thống
+
+Tạo sẵn file .env lưu các biến môi trường như:
+
+Database URL
+
+JWT secret
+
+Ghi rõ cách build và chạy ứng dụng trong README.md
+
+Yêu cầu bảo mật:
+Hash password khi lưu DB
+
+Sử dụng prepared statements hoặc ORM để tránh SQL Injection
+
+Middleware kiểm tra token cho các route cần đăng nhập
+
+Bảo vệ github_token không được trả về API response
+
+GitHub API Integration:
+Sử dụng GitHub REST API v3 (hoặc GraphQL API nếu muốn)
+
+Endpoint dùng để get PR info:
+
+bash
+Sao chép
+Chỉnh sửa
+GET /repos/{owner}/{repo}/pulls/{pull_number}
+Gọi API bằng GitHub token riêng của từng user (lưu trong DB).
+
+Nếu gọi API fail (PR không tồn tại hoặc token invalid), trả lỗi rõ ràng cho user.
+
+Database Schema gợi ý:
+users:
+
+id (uuid)
+
+email
+
+password_hash
+
+github_username
+
+github_token
+
+created_at
+
+notes:
+
+id (uuid)
+
+user_id (uuid, FK users.id)
+
+title
+
+content
+
+github_pr_number
+
+repo_owner
+
+repo_name
+
+created_at
+
+pull_requests:
+
+id (uuid)
+
+number (integer)
+
+repo_owner
+
+repo_name
+
+title
+
+body
+
+author
+
+state
+
+url
+
+created_at
+
+note_pr_links:
+
+note_id (uuid)
+
+pr_id (uuid)
+
+API Example:
+POST /api/auth/register
+
+POST /api/auth/login
+
+GET /api/user/profile
+
+PUT /api/user/profile → cập nhật github_username, github_token
+
+POST /api/notes
+
+GET /api/notes
+
+GET /api/notes/:id
+
+PUT /api/notes/:id
+
+DELETE /api/notes/:id
+
+Output cần:
+Full source code Golang
+
+docker-compose.yaml
+
+README.md hướng dẫn setup và chạy
+
+.env file ví dụ
+
+Các migration SQL nếu có
+
+Ví dụ call API (vd. curl / Postman collection)
+
+Lưu ý các dependency (go.mod)
+
+Hãy viết code theo best practice, có cấu trúc thư mục rõ ràng, dễ maintain, dễ mở rộng, dễ đọc cho Golang developer.

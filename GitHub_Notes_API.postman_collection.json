@@ -1,0 +1,304 @@
+{
+	"info": {
+		"_postman_id": "github-notes-api",
+		"name": "GitHub Notes API",
+		"description": "API collection for GitHub Notes Backend",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.environment.set('authToken', responseJson.data.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "login"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "User Management",
+			"item": [
+				{
+					"name": "Get Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/user/profile",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "user", "profile"]
+						}
+					}
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"github_username\": \"yourusername\",\n  \"github_token\": \"ghp_your_github_token_here\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/user/profile",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "user", "profile"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Notes Management",
+			"item": [
+				{
+					"name": "Create Note",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"My First Note\",\n  \"content\": \"This is the content of my note.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/notes",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "notes"]
+						}
+					}
+				},
+				{
+					"name": "Create Note with PR",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"PR Review Note\",\n  \"content\": \"Notes about the PR review\",\n  \"github_pr_number\": 1,\n  \"repo_owner\": \"facebook\",\n  \"repo_name\": \"react\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/notes",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "notes"]
+						}
+					}
+				},
+				{
+					"name": "Get Notes",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/notes?page=1&limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "notes"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Notes",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/notes?search=note&pr_state=open",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "notes"],
+							"query": [
+								{
+									"key": "search",
+									"value": "note"
+								},
+								{
+									"key": "pr_state",
+									"value": "open"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Note by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/notes/{{noteId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "notes", "{{noteId}}"]
+						}
+					}
+				},
+				{
+					"name": "Update Note",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Updated Note Title\",\n  \"content\": \"Updated note content\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/notes/{{noteId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "notes", "{{noteId}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete Note",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/notes/{{noteId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "notes", "{{noteId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Health Check",
+			"request": {
+				"method": "GET",
+				"url": {
+					"raw": "{{baseUrl}}/health",
+					"host": ["{{baseUrl}}"],
+					"path": ["health"]
+				}
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	]
+}
